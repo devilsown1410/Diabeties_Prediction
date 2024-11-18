@@ -20,35 +20,64 @@ rf_model.fit(x_train, y_train)
 
 st.markdown("""
     <style>
-    h1 {
-        color: #629584;
+    body {
+        background-color: #f9f9f9;
+    }
+    h1, h2, h3 {
+        color: #2c3e50;
         text-align: center;
-        font-size: 3rem;
+    }
+    .stButton>button {
+        background-color: #629584;
+        color: white;
+        border-radius: 5px;
+        width: 100%;
+    }
+    .stButton>button:hover {
+        background-color: #52776f;
+    }
+    .form-section {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     }
     </style>
     """, unsafe_allow_html=True)
 
-st.title("Diabetes Prediction")
+st.title("🌟 Diabetes Prediction App")
+st.markdown("""
+    Welcome to the **Diabetes Prediction App**.  
+    Fill in your details below to predict the risk of diabetes.  
+    Use the sliders and dropdowns to input your data, and click **Predict** to see the result.
+""")
 
-with st.form("my_form"):
-
-    st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
+st.markdown("<div class='form-section'>", unsafe_allow_html=True)
+with st.form("prediction_form"):
+    st.markdown("<h3>Enter Your Health Details</h3>", unsafe_allow_html=True)
     
-    spacer, col1, spacer, col2, spacer = st.columns([0.2, 1, 0.1, 1, 0.2])
+    col1, col2 = st.columns(2)
 
     with col1:
-        age = st.slider("Age", 0, 100, 25)
-        gender = st.selectbox("Gender", ["Male", "Female", "Other"])
-        hypertension = st.selectbox("Hypertension", [0, 1])
-        bmi = st.slider("BMI", 10.0, 50.0, 25.0)
+        age = st.slider("Age", 0, 100, 25, help="Your current age in years.")
+        gender = st.selectbox("Gender", ["Male", "Female", "Other"], help="Select your gender.")
+        hypertension = st.selectbox("Hypertension", [0, 1], help="0: No, 1: Yes")
+        bmi = st.slider("BMI", 10.0, 50.0, 25.0, step=0.1, help="Your Body Mass Index.")
 
     with col2:
-        smoking_history = st.selectbox("Smoking History", ["Never", "No Info", "Current", "Former", "Ever", "Not Current"])
-        heart_disease = st.selectbox("Heart Disease", [0, 1])
-        hba1c = st.slider("HbA1c Level", 4.0, 15.0, 5.5)
-        blood_glucose = st.slider("Blood Glucose Level", 50, 250, 100)
+        smoking_history = st.selectbox(
+            "Smoking History",
+            ["Never", "No Info", "Current", "Former", "Ever", "Not Current"],
+            help="Your smoking habits history."
+        )
+        heart_disease = st.selectbox("Heart Disease", [0, 1], help="0: No, 1: Yes")
+        hba1c = st.slider("HbA1c Level", 4.0, 15.0, 5.5, step=0.1, help="Your average blood glucose level over 3 months.")
+        blood_glucose = st.slider("Blood Glucose Level", 50, 250, 100, help="Your current blood glucose level.")
 
     submit_button = st.form_submit_button(label="Predict")
+
+st.markdown("</div>", unsafe_allow_html=True)
+
 
 if submit_button:
     gender_map = {"Male": 1, "Female": 2, "Other": 3}
@@ -57,10 +86,12 @@ if submit_button:
 
     prediction = rf_model.predict(input_data)
     result = "High risk of diabetes." if prediction[0] == 1 else "Low risk of diabetes."
-    
-    st.markdown(f"<h3 style='text-align: center; color: {'red' if prediction[0] == 1 else 'green'};'>{result}</h3>", unsafe_allow_html=True)
+    color = "red" if prediction[0] == 1 else "green"
 
-st.subheader("Feature Importance")
+    st.markdown(f"<h3 style='text-align: center; color: {color};'>{result}</h3>", unsafe_allow_html=True)
+
+
+st.markdown("<h3>Feature Importance</h3>", unsafe_allow_html=True)
 importances = rf_model.feature_importances_
 indices = np.argsort(importances)[::-1]
 features = x.columns
@@ -68,7 +99,7 @@ features = x.columns
 plt.figure(figsize=(8, 6))
 plt.title("Feature Importance", fontsize=16)
 plt.bar(range(x.shape[1]), importances[indices], align="center", color="#629584")
-plt.xticks(range(x.shape[1]), features[indices], rotation=45, ha='right')
+plt.xticks(range(x.shape[1]), features[indices], rotation=45, ha='right', fontsize=10)
 plt.tight_layout()
 
 st.pyplot(plt)
